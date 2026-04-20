@@ -1,0 +1,15 @@
+[project]
+name = "devdep"
+version = "0.1.0"
+description = "Developer Department with Agno Agents and Superpowers Methodology"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "agno",
+    "openai",
+    "python-dotenv",
+    "pytest",
+    "fastapi",
+    "sqlmodel",
+    "uvicorn[standard]",
+]

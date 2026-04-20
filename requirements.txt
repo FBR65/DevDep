@@ -1,0 +1,7 @@
+agno
+openai
+python-dotenv
+pytest
+fastapi
+sqlmodel
+uvicorn[standard]

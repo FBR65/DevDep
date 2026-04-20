@@ -1,0 +1,997 @@
+Superpowers mit Agno integrieren
+https://gemini.google.com/share/e39a05cec8c6
+Created with Thinking-Modus April 19, 2026 at 02:36 PM Published April 19, 2026 at 03:06 PM
+
+ist das https://github.com/obra/superpowers auch mit agno nutzbar
+
+Ja, das Repository obra/superpowers ist grundsätzlich mit Agno (ehemals Phidata) nutzbar, allerdings gibt es aktuell keine „native“ Ein-Klick-Integration oder ein vorgefertigtes Agno-Tool-Modul dafür.
+
+Da Superpowers im Kern ein „Methodology-as-Code“-Framework ist (bestehend aus strukturierten Markdown-Anweisungen und Shell-Skripten), kannst du es in Agno integrieren, indem du die Konzepte manuell verknüpfst.
+
+Hier ist, wie du das umsetzen kannst:
+1. Was ist obra/superpowers?
+
+Superpowers ist eine Sammlung von „Skills“ (in SKILL.md-Dateien), die KI-Agenten (wie Claude Code oder Cursor) dazu zwingen, professionellen Software-Engineering-Praktiken zu folgen:
+
+    Brainstorming: Erst verstehen, dann planen.
+
+    TDD (Test-Driven Development): Erst Tests schreiben, dann Code.
+
+    Subagenten: Aufgaben an spezialisierte Helfer delegieren.
+
+    Git-Worktrees: Isolierte Arbeitsbereiche für Aufgaben nutzen.
+
+2. Integration in Agno
+
+Da Agno ein Framework zum Bauen von Agenten ist, kannst du die Superpowers-Logik auf folgende Weise einbinden:
+
+    Knowledge Base: Du kannst den skills/-Ordner aus dem Superpowers-Repo klonen und als Knowledge Base in deinen Agno-Agenten laden. Der Agent kann dann die spezifischen Workflows (z. B. wie man ein systematisches Debugging durchführt) bei Bedarf nachschlagen.
+
+    System Prompt: Kopiere die Kern-Instruktionen aus dem Superpowers-Repo (oft in den Bootstrap-Prompts zu finden) in den description- oder instructions-Teil deines Agno-Agenten. Dies gibt dem Agenten die „Persönlichkeit“ und Disziplin des Frameworks.
+
+    Tools: Superpowers verlässt sich stark auf Terminal-Befehle (Git, Testing-Frameworks). Du solltest deinem Agno-Agenten entsprechende Tools zur Verfügung stellen (z.B. ShellTools oder spezialisierte Git-Tools), damit er die in den Skills beschriebenen Aktionen auch ausführen kann.
+
+3. Beispielhafter Aufbau (Pseudo-Code)
+Python
+
+from agno.agent import Agent
+from agno.knowledge import PDFKnowledgeBase # Oder ein Loader für Markdown
+
+agent = Agent(
+    name="Superpowers Agent",
+    # Hier die Kernphilosophie von Superpowers hinterlegen
+    instructions=[
+        "Follow the Superpowers methodology: Brainstorm -> Plan -> TDD -> Review.",
+        "Always write a failing test before implementing code.",
+        "Use subagents for code reviews."
+    ],
+    # Tools für Shell-Zugriff bereitstellen
+    tools=[ShellTools(), GitTools()], 
+    # Skills als Wissen hinterlegen
+    knowledge=MarkdownKnowledgeBase(path="path/to/superpowers/skills"),
+    show_tool_calls=True
+)
+
+Zusammenfassung
+
+Es gibt keine fertige agno install superpowers Lösung, aber da Superpowers modell-agnostisch und plattform-offen konzipiert ist (es wird sogar offiziell für „OpenCode“ und generische CLI-Agenten beworben), ist es eine hervorragende Ergänzung für Agno-Agenten, die komplexe Software-Projekte bearbeiten sollen.
+
+Tipp: Schau dir im Superpowers-Repo besonders die Datei .opencode/INSTALL.md an. Die dortigen Instruktionen lassen sich am einfachsten auf andere Agenten-Frameworks wie Agno übertragen.
+
+Könnte basierend darauf eine Software Developement Team erstellt werden?
+
+Ja, absolut. Tatsächlich ist die Kombination aus Agno (das hervorragend darin ist, mehrere spezialisierte Agenten zu koordinieren) und Superpowers (das die methodischen Leitplanken liefert) fast schon ideal für den Aufbau eines autonomen Software-Entwicklungsteams.
+
+In Agno nutzt du dafür die Team-Klasse, um verschiedene Agenten zusammenzubringen, wobei jeder Agent eine spezifische „Superpower“ aus dem Repository als Handlungsanweisung erhält.
+Struktur eines „Superpowers“-Teams in Agno
+
+Hier ist ein Konzept, wie du die Rollen verteilen würdest:
+
+    Der Architekt (Lead Agent): Nutzt den brainstorm-Skill. Er analysiert die Anforderungen, prüft die Machbarkeit und erstellt den technischen Plan.
+
+    Der Entwickler (Coder): Nutzt den tdd-Skill. Er schreibt erst den Test (Red), dann den Code (Green) und führt das Refactoring durch.
+
+    Der Reviewer/QA: Nutzt den subagent-Skill, um den Code gegen die ursprüngliche Planung und die Testabdeckung zu prüfen.
+
+Beispielhafte Umsetzung (Konzept)
+
+Du kannst die verschiedenen Skills von Superpowers als separate Instruktionen für die jeweiligen Teammitglieder definieren:
+Python
+
+from agno.agent import Agent
+from agno.agent.team import AgentTeam
+from agno.tools.shell import ShellTools
+
+# 1. Der Planer (Brainstorming & Architektur)
+planner = Agent(
+    name="Architect",
+    role="System Design & Planning",
+    instructions=["Always start with brainstorming.", "Output a structured plan in PLAN.md."],
+    tools=[ShellTools()],
+)
+
+# 2. Der Entwickler (TDD Spezialist)
+developer = Agent(
+    name="Developer",
+    role="Test-Driven Development",
+    instructions=["Follow the TDD cycle strictly.", "Use the 'tdd' skill from Superpowers."],
+    tools=[ShellTools()],
+)
+
+# 3. Das Team (Koordination)
+dev_team = AgentTeam(
+    agents=[planner, developer],
+    instructions=[
+        "Architect creates the plan first.",
+        "Developer implements based on the plan and runs tests.",
+        "Iterate until all tests pass."
+    ],
+    show_tool_calls=True,
+)
+
+dev_team.print_response("Erstelle eine Python-Klasse für ein Bankkonto mit Einzahlungsfunktion.")
+
+Die Vorteile dieses Setups
+
+    Modularität: Da Superpowers auf Markdown-Dateien basiert, kannst du die Anweisungen einfach aktualisieren, ohne den Python-Code der Agenten jedes Mal massiv ändern zu müssen.
+
+    Fehlertoleranz: Durch den TDD-Ansatz von Superpowers bemerkt das Agno-Team sofort, wenn ein Agent Code schreibt, der nicht funktioniert, da die Shell-Tools den Testfehler zurückgeben.
+
+    Skalierbarkeit: Du kannst für spezialisierte Aufgaben (z. B. Datenbank-Migrationen oder API-Dokumentation) einfach neue Agenten mit den entsprechenden SKILL.md-Vorlagen aus dem Repo hinzufügen.
+
+Was du beachten solltest
+
+Das obra/superpowers Repo ist sehr stark auf das Dateisystem und das Terminal ausgerichtet. Damit dein Agno-Team wirklich effektiv ist, müssen die Agenten über Tools verfügen, die ihnen erlauben, Dateien zu lesen, zu schreiben und Befehle auszuführen (z. B. pytest oder npm test).
+
+Möchtest du eine spezifische Pipeline aufbauen, zum Beispiel für ein Backend-Projekt, oder geht es dir eher um eine allgemeine Unterstützung beim Coden?
+
+allgemeine Unterstützung beim Coden, was aber dazu führen kann ein komplettes system entwickeln zu müssen
+
+Das ist ein spannender Ansatz. Wenn du von „kleinen Code-Schnipseln“ zu einem „kompletten System“ skalieren willst, ist die größte Herausforderung nicht das Coden selbst, sondern das Kontext-Management und die Architektur-Konsistenz.
+
+Genau hier glänzt die Kombination aus Agno (für die Ausführung) und Superpowers (für die Methodik). Um ein komplettes System stabil zu entwickeln, empfehle ich dir ein Agno-Team, das nach dem „Think-Plan-Execute-Verify“-Prinzip arbeitet.
+
+Hier ist der Bauplan für dein autonomes Software-Entwicklungsteam:
+1. Die Team-Struktur (Rollenverteilung)
+
+Anstatt einen „Alleskönner“-Agenten zu bauen, solltest du die Verantwortlichkeiten trennen. Das verhindert, dass der Agent bei steigender Komplexität den Überblick verliert.
+Rolle	Superpower / Skill	Aufgabe
+Product Owner	brainstorm	Analysiert deine vage Idee und wandelt sie in technische Anforderungen um. Erstellt die PROJECT_MAP.md.
+Tech Lead	plan	Zerlegt Anforderungen in kleine, logische Arbeitsschritte (Tasks). Entscheidet über die Systemarchitektur.
+Developer	tdd	Schreibt Tests und Code. Nutzt worktrees, um sauber an isolierten Features zu arbeiten.
+QA Engineer	review	Führt die Tests aus, prüft die Code-Qualität und gibt Feedback an den Developer zurück.
+2. Der Workflow: Vom Snippet zum System
+
+Damit aus Code-Fragmenten ein System wird, müssen die Agenten eine „Single Source of Truth“ pflegen. Superpowers nutzt dafür Markdown-Dateien im Repository.
+Phase A: Brainstorming & Dokumentation
+
+Wenn du sagst: „Ich brauche ein Abrechnungssystem“, fängt der Product Owner nicht an zu coden. Er nutzt den brainstorm-Skill, um Fragen zu stellen: „Welche Währungen? Welche Datenbank?“. Das Ergebnis ist eine README.md und eine ARCHITECTURE.md.
+Phase B: Iterative Umsetzung (Der TDD-Loop)
+
+Der Tech Lead erstellt einen Plan. Der Developer arbeitet diesen Plan Task für Task ab.
+
+    Red: Schreibt einen Test für die nächste kleine Funktion.
+
+    Green: Schreibt den minimalen Code, um den Test zu bestehen.
+
+    Refactor: Verbessert den Code, ohne die Funktion zu ändern.
+
+Phase C: System-Integration
+
+Durch den Einsatz von Git-Worktrees (ein Kernkonzept von Superpowers) kann das Team verschiedene Komponenten (z. B. Frontend und Backend) gleichzeitig entwickeln, ohne sich gegenseitig in die Quere zu kommen.
+3. Umsetzungstipps für Agno
+
+Um dieses Team in Agno produktiv zu machen, solltest du folgende Tools integrieren:
+
+    FileTools: Damit die Agenten die PROJECT_MAP.md und den Code lesen/schreiben können.
+
+    ShellTools: Absolut kritisch für Superpowers. Die Agenten müssen pytest, npm test oder go test ausführen können, um den TDD-Zyklus zu validieren.
+
+    Knowledge Base: Lade die Dokumentation deiner bevorzugten Libraries (z.B. FastAPI, React) als Vektordatenbank in Agno hoch, damit das Team „Expertise“ in diesen Frameworks hat.
+
+    Wichtiger Hinweis zur Sicherheit:
+    Da dieses Team mit ShellTools arbeitet und Dateien verändern kann, solltest du es unbedingt in einer isolierten Umgebung laufen lassen (z. B. in einem Docker-Container oder einer virtuellen Maschine), damit dein lokales System geschützt bleibt.
+
+Ein kleiner "Realitätscheck"
+
+Ein komplettes System autonom bauen zu lassen, klingt verlockend, erfordert aber von dir die Rolle des „Chief Architects“. Du musst die Pläne der Agenten reviewen. Agno erlaubt es dir, debug_mode=True zu setzen oder Zwischenschritte bestätigen zu lassen (human_in_the_loop).
+
+Hättest du gerne ein konkretes Python-Skript, wie du einen solchen "Team-Lead" Agenten in Agno konfigurierst, der die Superpowers-Skills als System-Instruktion nutzt?
+
+Erstelle den Code für alle Rollen und integriere superpowers. Am Ende soll das System in einem Dockercontainer arbeiten
+
+Das ist ein anspruchsvolles und mächtiges Setup. Um dies umzusetzen, erstellen wir eine Struktur, in der Agno die Orchestrierung übernimmt und die Superpowers-Methodik fest in den System-Instruktionen der Agenten verankert ist.
+
+Hier ist das komplette Paket: Die Rollendefinition, der Team-Code und die Docker-Konfiguration.
+1. Die Projektstruktur
+
+Erstelle einen Ordner für dein Projekt mit folgendem Aufbau:
+Plaintext
+
+agno-superpowers-team/
+├── main.py             # Der Agno-Code
+├── requirements.txt    # Abhängigkeiten
+├── Dockerfile          # Container-Definition
+└── .env                # API Keys (nicht einchecken!)
+
+2. Der Agno-Code (main.py)
+
+Dieser Code definiert das Team und integriert die "Superpowers"-Logik (Brainstorming, Plan, TDD) direkt in die Instruktionen.
+Python
+
+import os
+from agno.agent import Agent
+from agno.agent.team import AgentTeam
+from agno.models.openai import OpenAIChat
+from agno.tools.shell import ShellTools
+from agno.tools.file import FileTools
+
+# API Key laden
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY", "your-key-here")
+
+# --- ROLLEN DEFINIEREN BASIEREND AUF SUPERPOWERS ---
+
+# 1. Product Owner (Skill: Brainstorming & Requirements)
+product_owner = Agent(
+    name="ProductOwner",
+    role="Requirement Analysis",
+    model=OpenAIChat(id="gpt-4o"),
+    instructions=[
+        "Folge der Superpowers 'Brainstorming' Methodik.",
+        "Stelle klärende Fragen, bevor du Lösungen vorschlägst.",
+        "Erstelle und aktualisiere eine 'PROJECT_MAP.md' im Arbeitsverzeichnis.",
+        "Definiere den Scope so präzise wie möglich."
+    ],
+    tools=[FileTools()],
+    show_tool_calls=True,
+)
+
+# 2. Tech Lead (Skill: Planning & Architecture)
+tech_lead = Agent(
+    name="TechLead",
+    role="System Architecture & Task Planning",
+    model=OpenAIChat(id="gpt-4o"),
+    instructions=[
+        "Folge der Superpowers 'Planning' Methodik.",
+        "Zerlege Anforderungen aus der PROJECT_MAP.md in kleine, ausführbare Tasks.",
+        "Erstelle eine 'PLAN.md' Datei mit einer Checkliste von Aufgaben.",
+        "Entscheide dich für die besten Bibliotheken und Strukturen."
+    ],
+    tools=[FileTools()],
+    show_tool_calls=True,
+)
+
+# 3. Developer (Skill: TDD - Test Driven Development)
+developer = Agent(
+    name="Developer",
+    role="Software Engineering (TDD)",
+    model=OpenAIChat(id="gpt-4o"),
+    instructions=[
+        "Folge strikt der Superpowers 'TDD' Methodik.",
+        "Schritt 1 (RED): Schreibe zuerst einen fehlschlagenden Test.",
+        "Schritt 2 (GREEN): Schreibe den minimalen Code, um den Test zu bestehen.",
+        "Schritt 3 (REFACTOR): Optimiere den Code.",
+        "Nutze Shell-Tools, um Tests auszuführen und Ergebnisse zu validieren."
+    ],
+    tools=[FileTools(), ShellTools()],
+    show_tool_calls=True,
+)
+
+# 4. QA Engineer (Skill: Review & Validation)
+qa_engineer = Agent(
+    name="QA_Engineer",
+    role="Quality Assurance & Testing",
+    model=OpenAIChat(id="gpt-4o"),
+    instructions=[
+        "Überprüfe, ob der Code alle Anforderungen aus der PLAN.md erfüllt.",
+        "Führe die gesamte Testsuite mit Shell-Tools aus.",
+        "Gib konstruktives Feedback an den Developer, falls Tests fehlschlagen.",
+        "Achte auf Code-Style und Sicherheit."
+    ],
+    tools=[ShellTools()],
+    show_tool_calls=True,
+)
+
+# --- DAS SUPERPOWERS TEAM ---
+
+superpowers_team = AgentTeam(
+    agents=[product_owner, tech_lead, developer, qa_engineer],
+    instructions=[
+        "Arbeitet als synchronisiertes Team.",
+        "Der Product Owner startet mit dem Brainstorming.",
+        "Der Tech Lead erstellt danach den Plan.",
+        "Der Developer setzt den Plan mittels TDD um.",
+        "Der QA Engineer gibt erst dann grünes Licht, wenn alle Tests bestehen.",
+        "Speichert alle Ergebnisse permanent im Dateisystem."
+    ],
+    show_tool_calls=True,
+    markdown=True,
+)
+
+if __name__ == "__main__":
+    # Beispielaufruf
+    superpowers_team.print_response(
+        "Entwickle ein einfaches Python-basiertes Inventarsystem für eine Bibliothek. "
+        "Speichere die Daten in einer JSON-Datei. Nutze pytest für die Tests.",
+        stream=True
+    )
+
+3. Die Docker-Konfiguration
+requirements.txt
+Plaintext
+
+agno
+openai
+python-dotenv
+pytest
+
+Dockerfile
+
+Wir nutzen ein Python-Image und installieren zusätzliche Tools (wie Git), damit die Superpowers-Methoden (z. B. Worktrees) theoretisch genutzt werden können.
+Dockerfile
+
+# Basis-Image
+FROM python:3.11-slim
+
+# System-Abhängigkeiten installieren
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Arbeitsverzeichnis
+WORKDIR /app
+
+# Abhängigkeiten kopieren und installieren
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Den Code kopieren
+COPY main.py .
+
+# Verzeichnis für den generierten Code erstellen
+RUN mkdir -p /app/workspace
+WORKDIR /app/workspace
+
+# Startbefehl (wir gehen eine Ebene zurück zur main.py)
+CMD ["python", "/app/main.py"]
+
+4. System starten
+
+    API Key vorbereiten: Erstelle eine .env Datei im Hauptverzeichnis:
+    Plaintext
+
+    OPENAI_API_KEY=sk-xxxx...
+
+    Docker Image bauen:
+    Bash
+
+    docker build -t agno-superpowers .
+
+    Container ausführen:
+    Wir mappen ein lokales Verzeichnis (./output), damit du den generierten Code (PROJECT_MAP.md, Python-Dateien etc.) direkt auf deinem Rechner sehen kannst.
+    Bash
+
+    docker run -it \
+      --env-file .env \
+      -v $(pwd)/output:/app/workspace \
+      agno-superpowers
+
+Warum dieses System funktioniert:
+
+    Methodische Strenge: Durch die instructions wird der Agent gezwungen, erst zu planen, bevor er schreibt. Das verhindert das "Drauflos-Coden", das oft in Sackgassen führt.
+
+    Persistenz: Durch das Mounten des /app/workspace Volumes bleiben alle Dokumente (die "Single Source of Truth") erhalten, auch wenn der Container gestoppt wird.
+
+    Validierung: Da der Developer und QA Zugriff auf die Shell haben, können sie echte pytest-Befehle im Container ausführen. Ein Feature gilt erst dann als fertig, wenn der Container-Prozess die Tests erfolgreich meldet.
+
+Möchtest du, dass ich die Rollen noch um spezifische Framework-Kenntnisse (z.B. React oder FastAPI) erweitere?
+
+Kann man dafür nicht auch eine compose.yaml nutzen?
+
+Absolut, und das ist sogar die "Pro-Variante". Eine compose.yaml macht das Ganze deutlich sauberer, da du die langen docker run-Befehle vermeidest und die Umgebung (Netzwerke, Volumes, Umgebungsvariablen) fest definierst.
+
+Besonders cool: Wenn dein KI-Team ein "komplettes System" baut (z. B. eine Web-App mit Datenbank), kannst du diese Datenbank direkt als weiteren Service in die Compose-Datei hängen. So können deine Agenten gegen eine echte Instanz testen.
+
+Hier ist das Upgrade für dein Setup:
+1. Die compose.yaml
+
+Erstelle diese Datei im Hauptverzeichnis deines Projekts.
+YAML
+
+services:
+  agno-team:
+    build: .
+    container_name: superpowers-dev-team
+    env_file:
+      - .env
+    volumes:
+      # Mountet dein lokales 'output' Verzeichnis in den Container
+      # Damit siehst du den Code, den das Team schreibt, sofort in deinem Editor
+      - ./output:/app/workspace
+    # Erlaubt interaktive Eingaben (wichtig für Human-in-the-Loop)
+    stdin_open: true
+    tty: true
+    # Falls das Team z.B. einen Webserver zum Testen startet
+    ports:
+      - "8000:8000"
+    restart: "no"
+
+  # Optional: Wenn dein Team gegen eine Datenbank testen soll
+  # db:
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_PASSWORD: example_pass
+
+2. Der angepasste Workflow
+
+Mit der compose.yaml vereinfacht sich dein ganzer Prozess auf drei Schritte:
+
+    Konfigurieren: Stelle sicher, dass deine .env Datei den OPENAI_API_KEY enthält.
+
+    Bauen & Starten:
+    Bash
+
+    docker compose up --build
+
+    Zusehen (oder Mitmachen):
+    Das Team fängt sofort an zu arbeiten. Da wir das Volume ./output gemountet haben, kannst du in deinem lokalen VS Code (oder einem anderen Editor) zusehen, wie die PROJECT_MAP.md, die Tests und der Quellcode entstehen.
+
+Warum Compose hier den "Superpowers"-Gedanken unterstützt:
+
+    Isolierte Testumgebung: Wenn der QA_Engineer ein pytest ausführt, passiert das in einer kontrollierten Umgebung. Er kann nichts auf deinem Host-Rechner kaputt machen.
+
+    Persistente Methodik: Selbst wenn du den Container stoppst, bleiben die PROJECT_MAP.md und der PLAN.md im output-Ordner erhalten. Beim nächsten Start weiß das Team genau, wo es aufgehört hat.
+
+    Erweiterbarkeit: Wenn dein Projekt komplexer wird (z.B. Redis für Caching oder ein Frontend), fügst du diese Services einfach in die compose.yaml ein. Dein Agno-Team kann dann über den Servicenamen (z.B. http://db:5432) direkt darauf zugreifen.
+
+Ein kleiner Tipp für die Praxis:
+
+In deiner main.py könntest du den Pfad für die FileTools explizit auf /app/workspace setzen, damit die Agenten nicht versuchen, Systemdateien im Root des Containers zu bearbeiten.
+
+Soll ich den Python-Code für die Agenten noch so anpassen, dass sie sich automatisch mit einer Datenbank im Docker-Netzwerk verbinden können, um echte Integrationstests zu schreiben?
+
+setze den Pfad auf /app/workspace
+
+erweitere die Rollen um Framework Kenntnisse
+
+Erweitere die Tool Nutzung um MCP server von Context7 und die Möglichkeit auf github lesend zuzugreifen (evtl auch per MCP)
+
+als Datenbank soll sqlite dienen
+
+Das ist ein exzellentes Upgrade. Durch die Integration des Model Context Protocol (MCP) wird dein Agno-Team extrem mächtig, da es standardisierte Schnittstellen zu externen Datenquellen wie GitHub oder spezialisierten Kontext-Servern (wie Context.ai) nutzen kann.
+
+Hier ist das angepasste Setup. Wir nutzen SQLite, da es für den Dateisystem-basierten Ansatz von Superpowers ideal ist (kein separater DB-Container nötig, die DB landet direkt in deinem output Ordner).
+1. Die verbesserte main.py
+
+Wir setzen den base_dir für die Tools fest auf /app/workspace und integrieren die MCP-Server.
+Python
+
+import os
+from agno.agent import Agent
+from agno.agent.team import AgentTeam
+from agno.models.openai import OpenAIChat
+from agno.tools.shell import ShellTools
+from agno.tools.file import FileTools
+from agno.tools.mcp import McpTools # MCP Unterstützung
+
+# Pfad-Konfiguration
+WORKSPACE_ROOT = "/app/workspace"
+
+# --- MCP SERVER KONFIGURATION ---
+# Wir gehen davon aus, dass die MCP Server als separate Prozesse oder über URLs erreichbar sind.
+# Beispiel für GitHub (Read-Only) und Context.ai
+github_mcp = McpTools(command="npx", args=["-y", "@modelcontextprotocol/server-github"])
+# Ersetze 'context-server-command' durch den tatsächlichen Aufruf für Context.ai
+context_mcp = McpTools(command="npx", args=["-y", "@context7/mcp-server"]) 
+
+common_tools = [
+    FileTools(base_dir=WORKSPACE_ROOT),
+    ShellTools(base_dir=WORKSPACE_ROOT),
+    github_mcp,
+    context_mcp
+]
+
+# --- VERBESSERTE ROLLEN MIT FRAMEWORK-KNOWLEDGE ---
+
+# 1. Product Owner (Fokus: Requirements & SQLite Schema-Ideen)
+product_owner = Agent(
+    name="ProductOwner",
+    role="Expert for Product Strategy & SQLite Requirements",
+    model=OpenAIChat(id="gpt-4o"),
+    instructions=[
+        f"Arbeite ausschließlich im Pfad {WORKSPACE_ROOT}.",
+        "Nutze den GitHub MCP, um bestehende Repositories als Referenz zu lesen.",
+        "Framework-Wissen: Du verstehst, wie man leichtgewichtige Systeme mit SQLite plant.",
+        "Erstelle eine 'PROJECT_MAP.md', die das SQLite-Schema grob skizziert."
+    ],
+    tools=common_tools,
+)
+
+# 2. Tech Lead (Fokus: Architektur mit FastAPI & SQLModel)
+tech_lead = Agent(
+    name="TechLead",
+    role="Software Architect (FastAPI, SQLite, SQLModel)",
+    model=OpenAIChat(id="gpt-4o"),
+    instructions=[
+        "Du bist Experte für moderne Python-Backends (FastAPI, SQLAlchemy/SQLModel).",
+        "Plane die Architektur so, dass SQLite als primäre Datenbank genutzt wird (lokale .db Datei).",
+        "Stelle sicher, dass der Plan TDD-freundlich ist.",
+        "Nutze Context7 MCP für tiefergehende Code-Analysen und Architektur-Best-Practices."
+    ],
+    tools=common_tools,
+)
+
+# 3. Developer (Fokus: TDD, Python, SQLite-Queries)
+developer = Agent(
+    name="Developer",
+    role="Python Developer (FastAPI & TDD)",
+    model=OpenAIChat(id="gpt-4o"),
+    instructions=[
+        "Implementiere Features mit Python 3.11+, FastAPI und SQLModel.",
+        "Halte dich strikt an den Superpowers TDD-Skill: Erst fehlschlagende Tests, dann Code.",
+        "Schreibe effiziente SQLite-Queries und achte auf Datenbank-Migrationen.",
+        "Lese Dokumentationen via GitHub MCP, falls Bibliotheken unklar sind."
+    ],
+    tools=common_tools,
+)
+
+# 4. QA Engineer (Fokus: Pytest & Integrationstests)
+qa_engineer = Agent(
+    name="QA_Engineer",
+    role="QA Specialist (Pytest & SQLite Validation)",
+    model=OpenAIChat(id="gpt-4o"),
+    instructions=[
+        "Validiere den Code mit pytest.",
+        "Prüfe die Integrität der SQLite-Datenbank nach Testläufen.",
+        "Nutze Shell-Tools, um 'sqlite3' Befehle zur Inspektion der Daten auszuführen.",
+        "Gib erst frei, wenn die Testabdeckung > 90% ist."
+    ],
+    tools=common_tools,
+)
+
+# --- TEAM ORCHESTRIERUNG ---
+superpowers_team = AgentTeam(
+    agents=[product_owner, tech_lead, developer, qa_engineer],
+    instructions=[
+        f"Alles findet in {WORKSPACE_ROOT} statt.",
+        "Das Team nutzt GitHub zum Lesen von Best Practices und Context7 zur Optimierung.",
+        "Das Ziel ist ein robustes System basierend auf SQLite.",
+        "Folge der Superpowers-Methodik: Brainstorm -> Plan -> Execute -> Review."
+    ],
+    show_tool_calls=True,
+    markdown=True,
+)
+
+if __name__ == "__main__":
+    superpowers_team.print_response(
+        "Baue ein komplettes User-Management-System mit FastAPI und SQLite. "
+        "Inklusive Passwort-Hashing und einer PROJECT_MAP.md.",
+        stream=True
+    )
+
+2. Das Docker-Setup
+Dockerfile
+
+Wir müssen sicherstellen, dass Node.js installiert ist, da MCP-Server oft über npx ausgeführt werden.
+Dockerfile
+
+FROM python:3.11-slim
+
+# System-Tools: Git, Curl, SQLite und Node.js (für MCP)
+RUN apt-get update && apt-get install -y \
+    git curl sqlite3 nodejs npm \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Abhängigkeiten
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Arbeitsverzeichnis für die Agenten
+RUN mkdir -p /app/workspace
+COPY main.py .
+
+# GitHub Token Umgebungsvariable (falls benötigt)
+ENV GITHUB_PERSONAL_ACCESS_TOKEN=""
+
+CMD ["python", "main.py"]
+
+compose.yaml
+
+Hier definieren wir die persistente Speicherung für deine SQLite-Datenbank und den Code.
+YAML
+
+services:
+  agno-dev:
+    build: .
+    container_name: superpowers-mcp-team
+    env_file:
+      - .env
+    volumes:
+      # Hier landen Code UND die SQLite .db Datei
+      - ./output:/app/workspace
+    stdin_open: true
+    tty: true
+
+3. Was sich jetzt ändert:
+
+    MCP Server: Das Team kann jetzt npx nutzen, um zur Laufzeit MCP-Server zu starten. Wenn der Product Owner wissen möchte, wie eine bestimmte Library auf GitHub implementiert ist, nutzt er den GitHub MCP.
+
+    Framework-Fokus: Die Agenten wissen jetzt, dass sie FastAPI und SQLModel nutzen sollen. Der Developer wird also Code schreiben, der perfekt mit SQLite harmoniert.
+
+    SQLite-Vorteil: Da SQLite eine Datei ist (z.B. database.db), kannst du diese Datei nach dem Durchlauf einfach in deinem lokalen output-Ordner mit einem Tool wie DB Browser for SQLite öffnen und die Ergebnisse prüfen.
+
+    Kontext durch Context7: Durch den MCP-Server von Context7 erhält dein Team Zugriff auf deren spezifische KI-Optimierungen (vorausgesetzt, der Server-Befehl ist korrekt konfiguriert).
+
+Wichtiger Hinweis zu GitHub:
+Damit der GitHub MCP funktioniert, musst du in deiner .env Datei einen GITHUB_PERSONAL_ACCESS_TOKEN mit repo (read) Berechtigungen hinterlegen.
+
+Bist du bereit, das System mit dem ersten Projekt (z.B. dem User-Management) zu testen?
+
+# Wir gehen davon aus, dass die MCP Server als separate Prozesse oder über URLs erreichbar sind. <- Wie soll das gehen? Entweder wird das in Docker integriert oder es wird nicht funktionieren
+
+Da hast du völlig recht – da war ich im letzten Schritt etwas zu vage. In einer isolierten Docker-Umgebung "sieht" der Container keine Prozesse, die auf deinem Host-Rechner laufen. Wenn wir von MCP-Servern sprechen, müssen wir sie entweder direkt in das Image einbauen oder als Sidecar-Container in die compose.yaml aufnehmen.
+
+Der stabilste Weg für dein Setup ist die direkt Integration in den Agno-Container. So kann der Agent den MCP-Server einfach als lokalen Subprozess starten.
+
+Hier ist das korrigierte, "wasserdichte" Setup:
+1. Das "All-in-One" Dockerfile
+
+Wir installieren Node.js (für JS-basierte MCP-Server) und Python-Abhängigkeiten direkt mit ein.
+Dockerfile
+
+FROM python:3.11-slim
+
+# System-Abhängigkeiten: Node.js ist Pflicht für die meisten MCP-Server (npx)
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    sqlite3 \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Agno und Python-Pakete
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Vorinstallation der MCP-Server (optional, beschleunigt den Start)
+# Hier installieren wir die Server global, damit 'npx' sie nicht jedes Mal neu laden muss
+RUN npm install -g @modelcontextprotocol/server-github @modelcontextprotocol/server-everything
+
+COPY main.py .
+RUN mkdir -p /app/workspace
+
+# Wichtig: Der Container braucht die Keys für die MCP-Dienste
+ENV GITHUB_PERSONAL_ACCESS_TOKEN=""
+
+CMD ["python", "main.py"]
+
+2. Die Tool-Einbindung in main.py
+
+Damit Agno den MCP-Server im Container findet, nutzen wir stdio (Standard Input/Output). Der Agent startet den Server als "Kind-Prozess" innerhalb des Docker-Containers.
+Python
+
+from agno.agent import Agent
+from agno.tools.mcp import McpTools
+
+# Definition des MCP-Tools für GitHub
+# Der Agent führt dies IM Docker-Container aus.
+github_mcp = McpTools(
+    command="npx",
+    args=["-y", "@modelcontextprotocol/server-github"],
+    env={
+        "GITHUB_PERSONAL_ACCESS_TOKEN": os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
+    }
+)
+
+# Falls Context7 einen MCP-Server über npx anbietet:
+context_mcp = McpTools(
+    command="npx",
+    args=["-y", "@context7/mcp-server"], # Platzhalter für den echten Namen
+    env={"CONTEXT7_API_KEY": os.getenv("CONTEXT7_API_KEY")}
+)
+
+# Der Pfad-Schutz für die Agenten
+WORKSPACE_ROOT = "/app/workspace"
+file_tools = FileTools(base_dir=WORKSPACE_ROOT)
+shell_tools = ShellTools(base_dir=WORKSPACE_ROOT)
+
+3. Die compose.yaml
+
+Hier stellen wir sicher, dass alle Token sauber vom Host in den Container fließen.
+YAML
+
+services:
+  agno-dev:
+    build: .
+    container_name: superpowers-mcp-team
+    env_file:
+      - .env  # Hier müssen GITHUB_PERSONAL_ACCESS_TOKEN etc. drinstehen
+    volumes:
+      - ./output:/app/workspace
+    stdin_open: true
+    tty: true
+    # Das Team braucht Internetzugriff für GitHub/MCP
+    networks:
+      - dev-network
+
+networks:
+  dev-network:
+    driver: bridge
+
+Warum das jetzt funktioniert:
+
+    Keine Geister-Prozesse: Der MCP-Server läuft als Subprozess von Python innerhalb desselben Docker-Containers. Die Kommunikation erfolgt über stdin/stdout, was innerhalb eines Containers perfekt funktioniert.
+
+    Identische Umgebung: Da Node.js im Dockerfile installiert wurde, ist der Befehl npx für den Agno-Agenten verfügbar.
+
+    Sicherheit: Dein GitHub-Token wird nur innerhalb des Docker-Netzwerks verwendet und landet nie im Image-Layer (da wir .env nutzen).
+
+Ein kleiner "Reality Check" zu Context7:
+
+Stelle sicher, dass du den exakten npx-Befehl oder den Pfad zum MCP-Executable von Context7 hast. Wenn sie keinen Standard-MCP-Server über npm anbieten, müsstest du deren Binary im Dockerfile per curl herunterladen und in den PATH legen.
+
+Soll ich dir zeigen, wie du den Agenten dazu bringst, im Fehlerfall (z.B. MCP-Server startet nicht) einen automatischen Retry oder ein Fallback auf Standard-Webrecherche zu machen?
+
+# Wichtig: Der Container braucht die Keys für die MCP-DiensteENV GITHUB_PERSONAL_ACCESS_TOKEN=""
+
+
+Gibt es keinen GITHUB MCP ohne Authentifizierung?
+
+Kurz gesagt: Nein, für den offiziellen GitHub MCP-Server von Model Context Protocol gibt es keinen "No-Auth"-Modus.
+
+Das hat einen einfachen technischen Grund: Der Server kommuniziert mit der GitHub REST/GraphQL API. Ohne Authentifizierung erlaubt GitHub nur 60 Anfragen pro Stunde pro IP-Adresse. Ein KI-Agent, der Code durchsucht, Dateien liest und Repositories analysiert, würde dieses Limit in weniger als 5 Minuten sprengen. Mit einem Token (PAT) hast du 5.000 Anfragen pro Stunde.
+
+Aber keine Sorge, es gibt für dein "Read-Only"-Szenario im Docker-Container zwei sehr gute Auswege:
+Lösung A: Der "Git-Workaround" (Kein Token nötig)
+
+Wenn es dir nur darum geht, öffentliche Repositories zu lesen, brauchst du überhaupt keinen MCP-Server. Da wir Git bereits im Dockerfile installiert haben, kann der Agent einfach die ShellTools nutzen.
+
+    Vorteil: Funktioniert ohne Token für jedes öffentliche Repo.
+
+    Befehl des Agenten: git clone --depth 1 https://github.com/user/repo
+
+    Anpassung: Du sagst dem ProductOwner einfach in den Instruktionen: "Um Code zu analysieren, clone das Repository mit den Shell-Tools in ein temporäres Verzeichnis."
+
+Lösung B: Der "Everything" MCP (Lokaler Kontext)
+
+Es gibt einen server-everything MCP oder einfache Datei-Browser. Wenn du das Repository vorher manuell (oder per Skript) in einen Unterordner von /output lädst, kann der Agent über die FileTools oder den Everything-MCP darauf zugreifen, als wäre es lokaler Code.
+Was ist mit Context7?
+
+Bei Context7 (oder ähnlichen Anbietern wie Sourcegraph/Cody) ist es ähnlich: Diese Dienste sind "Intelligence-as-a-Service". Sie müssen ihre Server bezahlen, weshalb sie fast immer einen API-Key verlangen, um dich zu identifizieren.
+Mein Pro-Tipp für dein Setup:
+
+Da du das System ohnehin in Docker betreibst, empfehle ich dir trotzdem einen Fine-Grained Personal Access Token von GitHub zu erstellen.
+
+    Gehe zu den GitHub Settings.
+
+    Erstelle einen Token, der nur Leserechte (Read-only) für öffentliche Repositories hat.
+
+    Dieser Token ist absolut harmlos, selbst wenn er durch ein Leck bekannt würde (da er nichts ändern oder löschen kann).
+
+So sieht die minimale .env dann aus:
+Bash
+
+OPENAI_API_KEY=sk-...
+# Nur für stabile API-Limits, auch für Read-Only
+GITHUB_PERSONAL_ACCESS_TOKEN=github_pat_... 
+
+Willst du, dass ich die main.py so umschreibe, dass sie als Fallback einfach git clone nutzt, falls kein Token gefunden wird? Damit wäre dein System "out-of-the-box" lauffähig, auch ohne Keys.
+
+"context7": {
+
+"command": "npx",
+
+"args": [
+
+"-y",
+
+"@upstash/context7-mcp"
+
+],
+
+"env": {
+
+"DEFAULT_MINIMUM_TOKENS": ""
+
+},
+
+"alwaysAllow": [
+
+"resolve-library-id",
+
+"query-docs"
+
+]
+
+}
+
+
+nutzt keinen Key, oder?
+
+Richtig beobachtet! In diesem speziellen Setup für den @upstash/context7-mcp (der von Upstash bereitgestellt wird) ist kein API-Key erforderlich, um öffentliche Dokumentationen zu durchsuchen.
+
+Upstash stellt diesen Dienst als "Community Service" zur Verfügung, bei dem sie die Embeddings für gängige Libraries hosten. Das ist ein riesiger Vorteil für dein Team, da es so ohne Kosten und ohne Key auf aktuelles Framework-Wissen zugreifen kann.
+
+Hier ist das finale, korrigierte Setup, das genau deine Konfiguration nutzt und alles in den Docker-Workflow integriert.
+1. Die finale main.py (Auszug)
+
+Ich habe die McpTools jetzt exakt so definiert, wie du sie für Context7 brauchst, und den GitHub-Fallback eingebaut.
+Python
+
+import os
+from agno.agent import Agent
+from agno.agent.team import AgentTeam
+from agno.models.openai import OpenAIChat
+from agno.tools.shell import ShellTools
+from agno.tools.file import FileTools
+from agno.tools.mcp import McpTools
+
+WORKSPACE_ROOT = "/app/workspace"
+
+# --- MCP TOOLS ---
+
+# Context7 von Upstash (Keyless für Docs)
+context_mcp = McpTools(
+    command="npx",
+    args=["-y", "@upstash/context7-mcp"],
+    env={"DEFAULT_MINIMUM_TOKENS": "1000"} # Beispielwert
+)
+
+# GitHub MCP (Benötigt Token für stabile Limits, sonst Fallback auf Git CLI)
+github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
+github_mcp = None
+if github_token:
+    github_mcp = McpTools(
+        command="npx",
+        args=["-y", "@modelcontextprotocol/server-github"],
+        env={"GITHUB_PERSONAL_ACCESS_TOKEN": github_token}
+    )
+
+# --- AGENTEN ROLES ---
+
+# Tech Lead nutzt Context7 für Architektur-Entscheidungen
+tech_lead = Agent(
+    name="TechLead",
+    role="Software Architect (FastAPI & SQLite)",
+    model=OpenAIChat(id="gpt-4o"),
+    instructions=[
+        f"Arbeite in {WORKSPACE_ROOT}.",
+        "Nutze 'query-docs' via Context7, um Best Practices für FastAPI und SQLModel zu finden.",
+        "Entwirf ein sauberes SQLite-Schema."
+    ],
+    tools=[FileTools(base_dir=WORKSPACE_ROOT), context_mcp],
+)
+
+# Developer nutzt Shell (Git) falls kein GitHub MCP da ist
+dev_tools = [FileTools(base_dir=WORKSPACE_ROOT), ShellTools(base_dir=WORKSPACE_ROOT), context_mcp]
+if github_mcp:
+    dev_tools.append(github_mcp)
+
+developer = Agent(
+    name="Developer",
+    role="TDD Python Developer",
+    model=OpenAIChat(id="gpt-4o"),
+    instructions=[
+        "Folge der Superpowers TDD-Methodik.",
+        "Falls du Code-Referenzen brauchst und der GitHub-MCP fehlt, nutze 'git clone' via Shell.",
+        "Schreibe sauberen Code mit FastAPI und SQLite."
+    ],
+    tools=dev_tools,
+)
+
+# ... Rest des Teams wie gehabt
+
+2. Das optimierte Dockerfile
+
+Damit npx im Container reibungslos funktioniert, installieren wir die Pakete vorab.
+Dockerfile
+
+FROM python:3.11-slim
+
+# System-Abhängigkeiten inkl. Node.js und SQLite
+RUN apt-get update && apt-get install -y \
+    git curl sqlite3 nodejs npm \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Python Requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Vorinstallation der MCP-Server beschleunigt den Start der Agenten enorm
+RUN npm install -g @upstash/context7-mcp @modelcontextprotocol/server-github
+
+COPY main.py .
+RUN mkdir -p /app/workspace
+
+CMD ["python", "main.py"]
+
+3. Die compose.yaml (Final)
+
+Hier ist alles vereint. Du musst nur noch deinen OpenAI Key in die .env eintragen.
+YAML
+
+services:
+  dev-team:
+    build: .
+    container_name: agno_superpowers_team
+    env_file:
+      - .env
+    volumes:
+      # Dein Code landet hier auf dem Host-Rechner
+      - ./output:/app/workspace
+    stdin_open: true
+    tty: true
+    # Netzwerk für MCP-Downloads und API-Anfragen
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+Was dein Team jetzt kann:
+
+    Context7 Power: Der Tech Lead kann Fragen stellen wie: "Suche in der FastAPI Doku nach dem besten Weg, SQLite mit Background Tasks zu nutzen." Der MCP-Server liefert die Antwort direkt aus dem Upstash-Index.
+
+    Dateisystem-Kontrolle: Alle Dateien werden in /app/workspace geschrieben, was durch Docker direkt in deinen lokalen output-Ordner gespiegelt wird.
+
+    TDD Zyklus: Der Developer schreibt einen Test, führt pytest über die ShellTools aus, sieht die Fehlermeldung und korrigiert den Code – alles im Container.
+
+    SQLite Autonomie: Die Datenbank ist eine einfache Datei im Workspace. Du kannst sie nach dem Lauf mit jedem SQLite-Viewer öffnen.
+
+    Tipp für Context7: > Da es keinen Key nutzt, ist es perfekt für die "Brainstorming"-Phase. Der Product Owner kann damit prüfen, ob die gewählten Frameworks für deine Idee (z.B. User-Management) überhaupt geeignet sind.
+
+Soll ich dir noch ein Beispiel für eine .env Datei mit den optimalen Standardwerten für dieses Setup erstellen?
+
+ja, erstelle eine .env.example
+
+Hier ist die .env.example, die alle notwendigen Variablen für dein Agno-Superpowers-Team enthält. Du kannst diese Datei als Vorlage verwenden, sie in .env umbenennen und deine echten Werte eintragen.
+.env.example
+Bash
+
+# =================================================================
+# AGNO SUPERPOWERS TEAM - KONFIGURATION
+# =================================================================
+
+# --- KI MODELL (ERFORDERLICH) ---
+# Dein OpenAI API Key für GPT-4o
+OPENAI_API_KEY=sk-proj-DEIN_OPENAI_KEY_HIER
+
+# --- MCP: GITHUB (OPTIONAL) ---
+# Ein Fine-Grained Personal Access Token (PAT) erhöht die API-Limits.
+# Erstelle einen Token mit "Read-only" Zugriff auf öffentliche Repositories.
+# Falls leer gelassen, nutzt das Team 'git clone' via Shell als Fallback.
+GITHUB_PERSONAL_ACCESS_TOKEN=
+
+# --- MCP: CONTEXT7 (UPSTASH) ---
+# Dieser MCP-Server wird über npx geladen und benötigt aktuell keinen Key.
+# Hier können Standardwerte für die Token-Verarbeitung gesetzt werden.
+DEFAULT_MINIMUM_TOKENS=1000
+
+# --- PROJEKT EINSTELLUNGEN ---
+# Name des Projekts (wird oft für Logs oder DB-Namen genutzt)
+PROJECT_NAME=superpowers-dev-system
+
+# Speicherort der SQLite Datenbank im Container
+# Die Datei landet automatisch in deinem lokalen ./output Ordner
+DATABASE_URL=sqlite:////app/workspace/project_database.db
+
+# --- AGNO / DEBUGGING ---
+# Setze auf DEBUG, um detaillierte Logs der Agenten-Interaktionen zu sehen
+AGNO_LOG_LEVEL=INFO
+SHOW_TOOL_CALLS=true
+
+Kurze Anleitung zur Einrichtung:
+
+    Datei kopieren:
+    Bash
+
+    cp .env.example .env
+
+    OpenAI Key eintragen: Ohne den OPENAI_API_KEY können die Agenten nicht "denken".
+
+    GitHub Token (Empfohlen): Auch wenn es "keyless" geht, ist ein GitHub PAT (Personal Access Token) sehr ratsam, damit das Team nicht nach 60 Anfragen von der GitHub API gesperrt wird.
+
+    Starten:
+    Sobald die .env gefüllt ist, kannst du das System mit Docker Compose hochfahren:
+    Bash
+
+    docker compose up --build
+
+Was passiert nach dem Start?
+
+    Initialisierung: Docker installiert Node.js, Python und die MCP-Server.
+
+    Workspace: Der Ordner ./output auf deinem Rechner wird mit /app/workspace im Container synchronisiert.
+
+    Agenten-Aktivität: Der Product Owner erstellt die PROJECT_MAP.md, der Tech Lead die PLAN.md und der Developer beginnt mit den ersten .py Dateien und pytest-Tests.
+
+Du kannst nun in Echtzeit in deinem lokalen ./output Verzeichnis zusehen, wie das Team die SQLite-Datenbank erstellt und das System programmiert!

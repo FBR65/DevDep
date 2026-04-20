@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  dev-team:
+    build: 
+      context: ..
+      dockerfile: devdep/Dockerfile
+    container_name: agno_superpowers_team
+    env_file:
+      - .env
+    volumes:
+      # Your code will appear here on the host machine
+      - ../output:/app/workspace
+    stdin_open: true
+    tty: true
+    # Network for MCP downloads and API requests
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
