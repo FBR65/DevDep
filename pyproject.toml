@@ -12,4 +12,5 @@ dependencies = [
     "fastapi",
     "sqlmodel",
     "uvicorn[standard]",
+    "mcp>=1.27.0",
 ]
