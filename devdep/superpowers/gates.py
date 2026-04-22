@@ -92,29 +92,19 @@ class GateKeeper:
             ],
         )
 
-        # TDD-GATE: Tests must pass
+        # TDD-GATE: Tests must exist and pass
         self.gates["tdd-gate"] = Gate(
             name="TDD-GATE",
-            description="Tests must be written and passing before proceeding",
+            description="Tests must exist and be passing before proceeding",
             checks=[
                 GateCheck(
-                    name="failing_test_written",
-                    description="A failing test was written first (RED phase)",
-                    check_fn=lambda: True,  # This is enforced by workflow
-                ),
-                GateCheck(
-                    name="implementation_makes_test_pass",
-                    description="Implementation makes the test pass (GREEN phase)",
-                    check_fn=lambda: self._tests_pass(),
-                ),
-                GateCheck(
-                    name="refactor_complete",
-                    description="Code has been refactored (REFACTOR phase)",
-                    check_fn=lambda: True,  # Enforced by workflow
+                    name="test_files_exist",
+                    description="Test files exist on disk (RED phase completed)",
+                    check_fn=lambda: self._test_files_exist(),
                 ),
                 GateCheck(
                     name="all_tests_green",
-                    description="All tests pass after changes",
+                    description="All tests pass after implementation (GREEN phase completed)",
                     check_fn=lambda: self._tests_pass(),
                 ),
             ],
@@ -151,6 +141,16 @@ class GateKeeper:
     def _file_exists(self, path: str) -> bool:
         from pathlib import Path
         return Path(path).exists()
+
+    def _test_files_exist(self) -> bool:
+        """Check if any test files exist in the workspace."""
+        from pathlib import Path
+        workspace = Path("devdep/workspace")
+        if not workspace.exists():
+            return False
+        # Look for pytest-style test files
+        test_files = list(workspace.rglob("test_*.py")) + list(workspace.rglob("*_test.py"))
+        return len(test_files) > 0
 
     def _plan_has_acceptance_criteria(self) -> bool:
         try:

@@ -45,6 +45,14 @@ class SuperpowersTools(Toolkit):
         self.register(self.get_session_state)
         self.register(self.list_all_skills)
         self.register(self.read_skill_content)
+        self.register(self.write_file)
+        self.register(self.read_file)
+        # Single-parameter file writers for reliable agent usage
+        self.register(self.write_spec)
+        self.register(self.write_plan)
+        self.register(self.write_review)
+        self.register(self.write_code_file)
+        self.register(self.write_test_file)
 
     def bootstrap_session(self) -> str:
         """
@@ -156,3 +164,60 @@ class SuperpowersTools(Toolkit):
         if skill.filepath:
             return skill.filepath.read_text(encoding="utf-8")
         return skill.content
+
+    def write_file(self, file_name: str, contents: str) -> str:
+        """
+        Write contents to a file in the workspace.
+        This is a reliable alternative to FileTools.save_file.
+
+        Args:
+            file_name: Relative path within the workspace (e.g. 'SPEC.md')
+            contents: The full file content to write
+        """
+        target = self.workspace / file_name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(contents, encoding="utf-8")
+        return f"Successfully wrote {target} ({len(contents)} chars)"
+
+    def read_file(self, file_name: str) -> str:
+        """
+        Read the contents of a file from the workspace.
+        This is a reliable alternative to FileTools.read_file.
+
+        Args:
+            file_name: Relative path within the workspace (e.g. 'SPEC.md')
+        """
+        target = self.workspace / file_name
+        if not target.exists():
+            return f"ERROR: File not found: {target}"
+        return target.read_text(encoding="utf-8")
+
+    # ------------------------------------------------------------------
+    # Single-parameter file writers (model-friendly)
+    # ------------------------------------------------------------------
+
+    def write_spec(self, contents: str) -> str:
+        """Write the SPEC.md file. Only requires the file contents."""
+        return self.write_file("SPEC.md", contents)
+
+    def write_plan(self, contents: str) -> str:
+        """Write the PLAN.md file. Only requires the file contents."""
+        return self.write_file("PLAN.md", contents)
+
+    def write_review(self, contents: str) -> str:
+        """Write the REVIEW.md file. Only requires the file contents."""
+        return self.write_file("REVIEW.md", contents)
+
+    def write_code_file(self, file_name: str, contents: str) -> str:
+        """
+        Write a production code file. Requires file_name and contents.
+        Example: write_code_file(file_name='main.py', contents='...')
+        """
+        return self.write_file(file_name, contents)
+
+    def write_test_file(self, file_name: str, contents: str) -> str:
+        """
+        Write a test file. Requires file_name and contents.
+        Example: write_test_file(file_name='tests/test_auth.py', contents='...')
+        """
+        return self.write_file(file_name, contents)
