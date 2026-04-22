@@ -1,0 +1,72 @@
+name: default
+version: 1.0.0
+description: Default Superpowers development workflow
+
+pipeline:
+  - name: bootstrap
+    skill: superpowers-core
+    file: .superpowers/bootstrap.md
+    required: true
+
+  - name: skill-check
+    skill: superpowers-core
+    action: scan-skills
+    required: true
+
+  - name: brainstorm
+    skill: brainstorming
+    condition: "no_plan_exists or plan_outdated"
+    required: false
+
+  - name: plan
+    skill: writing-plans
+    condition: "after_brainstorm or plan_needed"
+    required: true
+    gate: hard-gate
+
+  - name: develop
+    skill: subagent-dev
+    condition: "plan_approved"
+    required: true
+
+  - name: test
+    skill: tdd
+    condition: "after_each_implementation"
+    required: true
+
+  - name: finish
+    skill: finishing
+    condition: "all_tasks_complete"
+    required: true
+
+gates:
+  hard-gate:
+    description: "Design approval required before implementation"
+    checks:
+      - plan_reviewed_against_spec
+      - acceptance_criteria_defined
+      - tdd_steps_defined
+      - dependencies_identified
+
+  tdd-gate:
+    description: "Tests must pass before proceeding"
+    checks:
+      - failing_test_written
+      - implementation_makes_test_pass
+      - refactor_complete
+      - all_tests_green
+
+  review-gate:
+    description: "Code review against SPEC and PLAN"
+    checks:
+      - spec_requirements_met
+      - plan_tasks_completed
+      - no_debug_code
+      - documentation_updated
+
+settings:
+  test_runner: pytest
+  min_coverage: 80
+  lint_tool: ruff
+  type_checker: mypy
+  commit_style: conventional

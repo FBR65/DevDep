@@ -13,4 +13,14 @@ dependencies = [
     "sqlmodel",
     "uvicorn[standard]",
     "mcp>=1.27.0",
+    "python-jose[cryptography]",
+    "passlib[bcrypt]",
+    "python-multipart",
+    "email-validator",
 ]
+
+[project.scripts]
+superpowers = "devdep.superpowers.__main__:main"
+
+[tool.uv]
+package = true
