@@ -175,6 +175,8 @@ class SuperpowersTools(Toolkit):
             contents: The full file content to write
         """
         target = self.workspace / file_name
+        if target.exists() and target.is_dir():
+            return f"ERROR: Cannot write file — path is an existing directory: {target}"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(contents, encoding="utf-8")
         return f"Successfully wrote {target} ({len(contents)} chars)"
@@ -190,6 +192,8 @@ class SuperpowersTools(Toolkit):
         target = self.workspace / file_name
         if not target.exists():
             return f"ERROR: File not found: {target}"
+        if target.is_dir():
+            return f"ERROR: Path is a directory, not a file: {target}"
         return target.read_text(encoding="utf-8")
 
     # ------------------------------------------------------------------
